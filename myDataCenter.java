@@ -75,20 +75,20 @@ public class CloudSimExample1 {
 	        // Fourth step: Create one virtual machine
 	        vmlist = new ArrayList<Vm>();
 
-	        // VM description
-	        int vmid = 0;
-	        int mips = 1000;
-	        long size = 10000; // image size (MB)
-	        int ram = 512; // vm memory (MB)
-	        long bw = 1000;
-	        int pesNumber = 1; // number of cpus
-	        String vmm = "Xen"; // VMM name
+	        // Create multiple virtual machines
+	        int numVms = 5; // Number of VMs to create
+	        for (int i = 0; i < numVms; i++) {
+	            int vmid = i;
+	            int mips = 1000;
+	            long size = 10000; // Image size (MB)
+	            int ram = 512 + i * 128; // Incremental RAM for demonstration
+	            long bw = 1000;
+	            int pesNumber = 1 + i; // Incremental number of CPUs
+	            String vmm = "Xen";
 
-	        // create VM
-	        Vm vm = new Vm(vmid, brokerId, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
-
-	        // add the VM to the vmList
-	        vmlist.add(vm);
+	            Vm vm = new Vm(vmid, brokerId, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
+	            vmlist.add(vm);
+	        }
 
 	        // submit vm list to the broker
 	        broker.submitVmList(vmlist);
@@ -96,21 +96,20 @@ public class CloudSimExample1 {
 	        // Fifth step: Create one Cloudlet
 	        cloudletList = new ArrayList<Cloudlet>();
 
-	        // Cloudlet properties
-	        int id = 0;
-	        long length = 400000;
-	        long fileSize = 300;
-	        long outputSize = 300;
-	        UtilizationModel utilizationModel = new UtilizationModelFull();
+	     // Create multiple cloudlets (workloads)
+	        int numCloudlets = 10; // Number of cloudlets to create
+	        for (int i = 0; i < numCloudlets; i++) {
+	            long length = 400000 + i * 10000; // Incremental length for demonstration
+	            long fileSize = 300;
+	            long outputSize = 300;
+	            UtilizationModel utilizationModel = new UtilizationModelFull();
 
-	        Cloudlet cloudlet1 = new Cloudlet(id, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
-	        cloudlet1.setUserId(brokerId);
-	        cloudlet1.setVmId(vmid);
+	            Cloudlet cloudlet = new Cloudlet(i, length, 1, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
+	            cloudlet.setUserId(brokerId);
+	            cloudlet.setVmId(i % numVms); // Distribute cloudlets among VMs
 
-	        // add the cloudlet to the list
-	        cloudletList.add(cloudlet1);
-
-	        // submit cloudlet list to the broker
+	            cloudletList.add(cloudlet);
+	        }
 	        broker.submitCloudletList(cloudletList);
 
 	        // Sixth step: Starts the simulation
